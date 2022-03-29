@@ -1,0 +1,56 @@
+-- Altera Memory Initialization File (MIF)
+
+DEPTH = 2048;
+WIDTH = 16;
+
+ADDRESS_RADIX = HEX;
+DATA_RADIX = HEX;
+
+CONTENT
+  BEGIN
+    [000..7FF] : 0000;  -- Default to NOP
+
+           000 : 9000;  --     IN     Switches
+           001 : 4824;  -- 	AND	   Mask1
+           002 : 3815;  -- 	JPOS   Switch1
+           003 : B803;  -- 	LOADI 3
+           004 : 98B0;  -- 	OUT		PXL_A
+           005 : 082A;  -- 	LOAD  Zero
+           006 : 98B1;  --     OUT    PXL_D
+           007 : 9000;  -- 	IN     Switches
+           008 : 4825;  -- 	AND	   Mask2
+           009 : 381A;  -- 	JPOS   Switch2
+           00A : B804;  -- 	LOADI 4
+           00B : 98B0;  -- 	OUT		PXL_A
+           00C : 082A;  -- 	LOAD  Zero
+           00D : 98B1;  --     OUT    PXL_D
+           00E : 9000;  -- 	IN     Switches
+           00F : 4826;  -- 	AND	   Mask3
+           010 : 381F;  -- 	JPOS   Switch3
+           011 : B805;  -- 	LOADI 5
+           012 : 98B0;  -- 	OUT		PXL_A
+           013 : 082A;  -- 	LOAD  Zero
+           014 : 98B1;  --     OUT    PXL_D
+           015 : B803;  -- 	LOADI 3
+           016 : 98B0;  -- 	OUT		PXL_A
+           017 : 0827;  -- 	LOAD  Red
+           018 : 98B1;  --     OUT    PXL_D
+           019 : 2807;  -- 	JUMP   Con1
+           01A : B804;  -- 	LOADI 4
+           01B : 98B0;  -- 	OUT		PXL_A
+           01C : 0828;  -- 	LOAD  Green
+           01D : 98B1;  --     OUT    PXL_D
+           01E : 280E;  -- 	JUMP   Con2
+           01F : B805;  -- 	LOADI 5
+           020 : 98B0;  -- 	OUT		PXL_A
+           021 : 0829;  -- 	LOAD  Blue
+           022 : 98B1;  --     OUT    PXL_D
+           023 : 2800;  -- 	JUMP   Loop
+           024 : 0001;  -- Mask1:     DW &B0000000001
+           025 : 0002;  -- Mask2:     DW &B0000000010
+           026 : 0004;  -- Mask3:     DW &B0000000100
+           027 : 8000;  -- Red:	   DW &B1000000000000000
+           028 : 0200;  -- Green:     DW &B1000000000
+           029 : 0010;  -- Blue:       DW &B0000010000
+           02A : 0000;  -- Zero:	   DW &B0000000000
+  END;
