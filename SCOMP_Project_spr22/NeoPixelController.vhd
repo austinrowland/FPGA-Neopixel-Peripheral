@@ -21,7 +21,8 @@ entity NeoPixelController is
 		data_in   : in   std_logic_vector(15 downto 0);
 		sda       : out  std_logic;
 		mode24	 : in   std_logic;
-		modeAll	 : in	  std_logic
+		modeAll	 : in	  std_logic;
+		modeAuto	 : in	  std_logic
 	); 
 
 end entity;
@@ -44,7 +45,7 @@ architecture internals of NeoPixelController is
 	signal ram_write_buffer : std_logic_vector(23 downto 0);
 
 	-- RAM interface state machine signals
-	type write_states is (idle16, storing16, idle24, storing24, idleAll, storingAll);
+	type write_states is (idle16, storing16, idle24, storing24, idleAll, storingAll,idleAuto, storingAuto);
 	signal wstate: write_states;
 
 	
@@ -243,7 +244,8 @@ begin
 			case wstate is
 			
 			when idle16 =>
-				if (io_write = '1') and (cs_data='1') then
+				if (io_write = '1') then
+					if (cs_data='1') then
 					-- latch the current data into the temporary storage register,
 					-- because this is the only time it'll be available.
 					-- Convert RGB565 to 24-bit color
@@ -253,25 +255,26 @@ begin
 					ram_we <= '1';
 					-- Change state
 					wstate <= storing16;
-				
-				elsif(io_write = '1') and (mode24='1') then
-					wstate <= idle24;
-				
-				elsif(io_write = '1') and (modeAll='1') then
-					wstate <= idleAll;
-				
-				elsif (io_write = '1') and (cs_addr='1') then
-					ram_write_addr <= data_in(7 downto 0);
+					elsif (mode24='1') then
+						wstate <= idle24;
+					elsif (modeAll='1') then
+						wstate <= idleAll;
+					elsif (modeAuto='1') then
+						wstate <= idleAuto;
+					elsif (cs_addr='1') then
+						ram_write_addr <= data_in(7 downto 0);
+					end if;
 			
 			-- If SCOMP is reading from the memory register...
-				
-				elsif (io_write = '0') and (cs_data='1') then
-					ram_write_addr <= ram_write_addr + 1;
-			
-			-- SCOMP incrementing after the writing state
-				
-				elsif (wstate = storing16) then
-					ram_write_addr <= ram_write_addr + 1;
+--				
+--				elsif (io_write = '0') then
+--					if (cs_data='1') then
+--						ram_write_addr <= ram_write_addr + 1;
+--			
+--			-- SCOMP incrementing after the writing state
+--				
+--				elsif (wstate = storing16) then
+--					ram_write_addr <= ram_write_addr + 1;
 				end if;
 			
 			when storing16 =>
@@ -325,6 +328,46 @@ begin
 					wstate <= idleAll;
 				end if;
 				ram_write_addr <= ram_write_addr + 1;
+				
+			when idleAuto =>
+				if (io_write = '1') then
+					if (cs_data='1') then
+					-- latch the current data into the temporary storage register,
+					-- because this is the only time it'll be available.
+					-- Convert RGB565 to 24-bit color
+					ram_write_buffer <= data_in(10 downto 5) & "00" & data_in(15 downto 11) & "000" & data_in(4 downto 0) & "000";
+					-- can raise ram_we on the upcoming transition, because data
+					-- won't be stored until next clock cycle.
+					ram_we <= '1';
+					-- Change state
+					wstate <= storingAuto;
+
+					elsif (cs_addr='1') then
+						ram_write_addr <= data_in(7 downto 0);
+					end if;
+			
+			-- If SCOMP is reading from the memory register...
+--				
+				elsif (io_write = '0') then
+					if (cs_data='1') then
+						ram_write_addr <= ram_write_addr + 1;
+					end if;
+				end if;
+			
+--			-- SCOMP incrementing after the writing state
+--				
+--				if (wstate = storingAuto) then
+--					ram_write_addr <= ram_write_addr + 1;
+--				end if;
+			
+			when storingAuto =>
+				-- All that's needed here is to lower ram_we.  The RAM will be
+				-- storing data on this clock edge, so ram_we can go low at the
+				-- same time.
+				ram_we <= '0';
+				ram_write_addr <= ram_write_addr + 1;
+				wstate <= idleAuto;
+				
 			when others =>
 				wstate <= idle16;
 			end case;

@@ -1,0 +1,29 @@
+-- Altera Memory Initialization File (MIF)
+
+DEPTH = 2048;
+WIDTH = 16;
+
+ADDRESS_RADIX = HEX;
+DATA_RADIX = HEX;
+
+CONTENT
+  BEGIN
+    [000..7FF] : 0000;  -- Default to NOP
+
+           000 : 98B8;  -- 	OUT MODE_AUTO_EN
+           001 : B800;  -- 	LOADI 0
+           002 : 98B0;  -- 	OUT		PXL_A
+           003 : 080C;  -- 	LOAD  Red
+           004 : 98B1;  --     OUT    PXL_D
+           005 : 080D;  -- 	LOAD  Green
+           006 : 98B1;  --     OUT    PXL_D
+           007 : 080E;  -- 	LOAD  Blue
+           008 : 98B1;  --     OUT    PXL_D
+           009 : 0001;  -- Mask1:     DW &B0000000001
+           00A : 0002;  -- Mask2:     DW &B0000000010
+           00B : 0004;  -- Mask3:     DW &B0000000100
+           00C : 8000;  -- Red:	   DW &B1000000000000000
+           00D : 0200;  -- Green:     DW &B1000000000
+           00E : 0010;  -- Blue:       DW &B0000010000
+           00F : 0000;  -- Zero:	   DW &B0000000000
+  END;
