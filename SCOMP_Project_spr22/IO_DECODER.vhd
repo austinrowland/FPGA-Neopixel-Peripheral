@@ -19,10 +19,6 @@ ENTITY IO_DECODER IS
     HEX1_EN       : OUT STD_LOGIC;
     PXL_A_EN      : OUT STD_LOGIC;
     PXL_D_EN      : OUT STD_LOGIC;
-	 SET_ALL_EN    : OUT STD_LOGIC;
-    --RGB_24_EN     : OUT STD_LOGIC;
-    --RGB_16_EN     : OUT STD_LOGIC;
-    MODE_16_EN    : OUT STD_LOGIC;
 	 MODE_24_EN		: OUT STD_LOGIC;
 	 MODE_ALL_EN	: OUT STD_LOGIC
   );
@@ -44,10 +40,6 @@ begin
   HEX1_EN      <= '1' WHEN (ADDR_INT = 16#005#) and (IO_CYCLE = '1') ELSE '0';
   PXL_A_EN     <= '1' WHEN (ADDR_INT = 16#0B0#) and (IO_CYCLE = '1') ELSE '0';
   PXL_D_EN     <= '1' WHEN (ADDR_INT = 16#0B1#) and (IO_CYCLE = '1') ELSE '0';
-  SET_ALL_EN   <= '1' WHEN (ADDR_INT = 16#0B2#) and (IO_CYCLE = '1') ELSE '0';
-  --RGB_24_EN    <= '1' WHEN (ADDR_INT = 16#0B3#) and (IO_CYCLE = '1') ELSE '0';
-  --RGB_16_EN    <= '1' WHEN (ADDR_INT = 16#0B4#) and (IO_CYCLE = '1') ELSE '0';
-  MODE_16_EN   <= '1' WHEN (ADDR_INT = 16#0B5#) and (IO_CYCLE = '1') ELSE '0';
   MODE_24_EN   <= '1' WHEN (ADDR_INT = 16#0B6#) and (IO_CYCLE = '1') ELSE '0';
   MODE_ALL_EN  <= '1' WHEN (ADDR_INT = 16#0B7#) and (IO_CYCLE = '1') ELSE '0';
       

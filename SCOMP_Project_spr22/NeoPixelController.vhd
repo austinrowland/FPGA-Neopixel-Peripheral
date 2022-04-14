@@ -15,16 +15,13 @@ entity NeoPixelController is
 	port(
 		clk_10M   : in   std_logic;
 		resetn    : in   std_logic;
-		io_write  : in   std_logic;
-		cs_addr   : in   std_logic;
-		cs_data   : in   std_logic;
-		mode16	 : in   std_logic;
-		mode24	 : in   std_logic;
-		modeAll	 : in   std_logic;
+		io_write  : in   std_logic ;
+		cs_addr   : in   std_logic ;
+		cs_data   : in   std_logic ;
 		data_in   : in   std_logic_vector(15 downto 0);
 		sda       : out  std_logic;
-		mystate   : out  std_logic_vector(7 downto 0)
-		--led		 : out  std_logic_vector(7 downto 0)
+		mode24	 : in   std_logic;
+		modeAll	 : in	  std_logic
 	); 
 
 end entity;
@@ -38,7 +35,6 @@ architecture internals of NeoPixelController is
 	signal red, green, blue: boolean;
 	signal redVector, greenVector, blueVector: std_logic_vector(7 downto 0);
 
-
 	-- Signals for data coming out of memory
 	signal ram_read_data : std_logic_vector(23 downto 0);
 	-- Signal to store the current output pixel's color data
@@ -48,7 +44,7 @@ architecture internals of NeoPixelController is
 	signal ram_write_buffer : std_logic_vector(23 downto 0);
 
 	-- RAM interface state machine signals
-	type write_states is (initial, idle16, storing16, idle24, storing24, idleAll, storingAll);
+	type write_states is (idle16, storing16, idle24, storing24, idleAll, storingAll);
 	signal wstate: write_states;
 
 	
@@ -98,8 +94,7 @@ begin
 		q_b => ram_read_data
 	);
 	
---	if wstate
---	mystate <= wstate;
+
 
 	-- This process implements the NeoPixel protocol by
 	-- using several counters to keep track of clock cycles,
@@ -120,7 +115,7 @@ begin
 		-- counter for the reset pulse
 		variable reset_count : integer range 0 to 1000;
 		-- Counter for the current pixel
-		variable pixel_count : integer range 0 to 3;
+		variable pixel_count : integer range 0 to 255;
 		
 		
 	begin
@@ -202,19 +197,25 @@ begin
 	
 	
 	process(clk_10M, resetn, cs_addr)
-    begin
-        -- For this implementation, saving the memory address
-        -- doesn't require anything special.  Just latch it when
-        -- SCOMP sends it.
-        if resetn = '0' then
-            ram_write_addr <= x"00";
-        elsif rising_edge(clk_10M) then
-            -- If SCOMP is writing to the address register...
-            if (io_write = '1') and (cs_addr='1') then
-                ram_write_addr <= data_in(7 downto 0);
-            end if;
-        end if;
-	
+	begin
+		-- For this implementation, saving the memory address
+		-- doesn't require anything special.  Just latch it when
+		-- SCOMP sends it.
+--		if resetn = '0' then
+--			ram_write_addr <= x"00";
+--		elsif rising_edge(clk_10M) then
+--			-- If SCOMP is writing to the address register...
+--			if (io_write = '1') and (cs_addr='1') then
+--				ram_write_addr <= data_in(7 downto 0);
+--			-- If SCOMP is reading from the memory register...
+--			elsif (io_write = '0') and (cs_data='1') then
+--				ram_write_addr <= ram_write_addr + 1;
+--			-- SCOMP incrementing after the writing state
+--			elsif (wstate = storing16) then
+--				ram_write_addr <= ram_write_addr + 1;
+--			end if;
+--		end if;
+--	
 	
 		-- The sequnce of events needed to store data into memory will be
 		-- implemented with a state machine.
@@ -228,9 +229,10 @@ begin
 		-- machine, because Moore outputs are susceptible to glitches, and
 		-- that's a bad thing for memory control signals.
 		if resetn = '0' then
-			wstate <= initial;
+			wstate <= idle16;
 			ram_we <= '0';
 			ram_write_buffer <= x"000000";
+			ram_write_addr <= x"00";
 			red <= (false);
 			blue <= (false);
 			green <= (false);
@@ -238,23 +240,10 @@ begin
 			-- Clearing memory would require cycling through each address
 			-- and setting them all to 0.
 		elsif rising_edge(clk_10M) then
-			case wstate is			
-			when initial=>
-			mystate <= "00000001";
-				if (io_write = '1') then
-					if (mode16 = '1') then
-						wstate <= idle16;
-					end if;
-					if (mode24 = '1') then
-						wstate <= idle24;
-					end if;
-					if (modeall = '1') then
-						wstate <= idleAll;
-					end if;
-				end if;
+			case wstate is
+			
 			when idle16 =>
 				if (io_write = '1') and (cs_data='1') then
-							mystate <= "00000000";
 					-- latch the current data into the temporary storage register,
 					-- because this is the only time it'll be available.
 					-- Convert RGB565 to 24-bit color
@@ -264,16 +253,35 @@ begin
 					ram_we <= '1';
 					-- Change state
 					wstate <= storing16;
+				
+				elsif(io_write = '1') and (mode24='1') then
+					wstate <= idle24;
+				
+				elsif(io_write = '1') and (modeAll='1') then
+					wstate <= idleAll;
+				
+				elsif (io_write = '1') and (cs_addr='1') then
+					ram_write_addr <= data_in(7 downto 0);
+			
+			-- If SCOMP is reading from the memory register...
+				
+				elsif (io_write = '0') and (cs_data='1') then
+					ram_write_addr <= ram_write_addr + 1;
+			
+			-- SCOMP incrementing after the writing state
+				
+				elsif (wstate = storing16) then
+					ram_write_addr <= ram_write_addr + 1;
 				end if;
+			
 			when storing16 =>
-			mystate <= "00000010";
 				-- All that's needed here is to lower ram_we.  The RAM will be
 				-- storing data on this clock edge, so ram_we can go low at the
 				-- same time.
 				ram_we <= '0';
-				wstate <= initial;
+				wstate <= idle16;
+				
 			when idle24 =>
-			mystate <= "00000011";
 				if (io_write = '1') and (cs_data='1') then
 					if (red = true) and (green = true) then
 						blueVector <= data_in(7 downto 0);
@@ -292,34 +300,33 @@ begin
 						redVector <= data_in(7 downto 0);
 						red <= true;
 					end if;
-						
-					-- latch the current data into the temporary storage register,
-					-- because this is the only time it'll be available.
-					-- Convert RGB565 to 24-bit color
-					-- 					ram_write_buffer <= data_in(10 downto 5) & "00" & data_in(15 downto 11) & "000" & data_in(4 downto 0) & "000";
-					-- can raise ram_we on the upcoming transition, because data
-					-- won't be stored until next clock cycle.
-					--						ram_we <= '1';
-					-- Change state
-					--						wstate <= storing16;
+				elsif (io_write = '1') and (cs_addr='1') then
+					ram_write_addr <= data_in(7 downto 0);
 				end if;
+				
 			when storing24 =>
-			mystate <= "00000100";
 				-- All that's needed here is to lower ram_we.  The RAM will be
 				-- storing data on this clock edge, so ram_we can go low at the
 				-- same time.
 				ram_we <= '0';
-				wstate <= initial;
-			when idleAll =>
-			mystate <= "00000101";
-			wstate <= initial;
-			--	if()
-			when storingAll =>
-			mystate <= "00000110";
-			wstate <= initial;
+				wstate <= idle24;
 				
+			when idleAll =>
+				if(io_write = '1') and (cs_data = '1') then
+					ram_write_buffer <= data_in(10 downto 5) & "00" & data_in(15 downto 11) & "000" & data_in(4 downto 0) & "000";
+					ram_we <= '1';
+					ram_write_addr <= x"00";
+					wstate <= storingAll;
+				end if;
+				
+			when storingAll =>
+				if(ram_write_addr = x"FF") then
+					ram_we <= '0';
+					wstate <= idleAll;
+				end if;
+				ram_write_addr <= ram_write_addr + 1;
 			when others =>
-				wstate <= initial;
+				wstate <= idle16;
 			end case;
 		end if;
 	end process;

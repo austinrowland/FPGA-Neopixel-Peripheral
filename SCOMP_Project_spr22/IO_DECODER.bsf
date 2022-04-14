@@ -21,9 +21,9 @@ https://fpgasoftware.intel.com/eula.
 */
 (header "symbol" (version "1.1"))
 (symbol
-	(rect 16 16 264 256)
+	(rect 16 16 264 224)
 	(text "IO_DECODER" (rect 5 0 71 12)(font "Arial" ))
-	(text "inst" (rect 8 224 20 236)(font "Arial" ))
+	(text "inst" (rect 8 192 20 204)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -90,32 +90,18 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 248 144)
 		(output)
-		(text "SET_ALL_EN" (rect 0 0 64 12)(font "Arial" ))
-		(text "SET_ALL_EN" (rect 163 139 227 151)(font "Arial" ))
+		(text "MODE_24_EN" (rect 0 0 66 12)(font "Arial" ))
+		(text "MODE_24_EN" (rect 161 139 227 151)(font "Arial" ))
 		(line (pt 248 144)(pt 232 144)(line_width 1))
 	)
 	(port
 		(pt 248 160)
 		(output)
-		(text "MODE_16_EN" (rect 0 0 63 12)(font "Arial" ))
-		(text "MODE_16_EN" (rect 164 155 227 167)(font "Arial" ))
+		(text "MODE_ALL_EN" (rect 0 0 75 12)(font "Arial" ))
+		(text "MODE_ALL_EN" (rect 152 155 227 167)(font "Arial" ))
 		(line (pt 248 160)(pt 232 160)(line_width 1))
 	)
-	(port
-		(pt 248 176)
-		(output)
-		(text "MODE_24_EN" (rect 0 0 66 12)(font "Arial" ))
-		(text "MODE_24_EN" (rect 161 171 227 183)(font "Arial" ))
-		(line (pt 248 176)(pt 232 176)(line_width 1))
-	)
-	(port
-		(pt 248 192)
-		(output)
-		(text "MODE_ALL_EN" (rect 0 0 75 12)(font "Arial" ))
-		(text "MODE_ALL_EN" (rect 152 187 227 199)(font "Arial" ))
-		(line (pt 248 192)(pt 232 192)(line_width 1))
-	)
 	(drawing
-		(rectangle (rect 16 16 232 224)(line_width 1))
+		(rectangle (rect 16 16 232 192)(line_width 1))
 	)
 )
