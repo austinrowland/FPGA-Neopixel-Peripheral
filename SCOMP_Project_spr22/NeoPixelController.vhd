@@ -22,7 +22,8 @@ entity NeoPixelController is
 		sda       : out  std_logic;
 		mode24	 : in   std_logic;
 		modeAll	 : in	  std_logic;
-		modeAuto	 : in	  std_logic
+		modeAuto	 : in	  std_logic;
+		modeFade	 : in	  std_logic
 	); 
 
 end entity;
@@ -45,8 +46,10 @@ architecture internals of NeoPixelController is
 	signal ram_write_buffer : std_logic_vector(23 downto 0);
 
 	-- RAM interface state machine signals
-	type write_states is (idle16, storing16, idle24, storing24, idleAll, storingAll,idleAuto, storingAuto);
+	type write_states is (idle16, storing16, idle24, storing24, idleAll, storingAll,idleAuto, storingAuto, idleFade, storingFade, inAndOut);
 	signal wstate: write_states;
+	
+	signal count : integer range 0 to 1001;
 
 	
 begin
@@ -237,6 +240,8 @@ begin
 			red <= (false);
 			blue <= (false);
 			green <= (false);
+			brighten <= (false);
+			count <= 0;
 			-- Note that resetting this device does NOT clear the memory.
 			-- Clearing memory would require cycling through each address
 			-- and setting them all to 0.
@@ -350,6 +355,67 @@ begin
 				ram_we <= '0';
 				ram_write_addr <= ram_write_addr + 1;
 				wstate <= idle16;
+				
+			when idleFade =>
+				if(io_write = '1') and (cs_data = '1') then
+					greenVector <= data_in(10 downto 5) & "00";
+					blueVector <= data_in(15 downto 11) & "000";
+					redVector <= data_in(4 downto 0) & "000";
+					ram_write_buffer <= redVector(7 downto 0) & greenVector(7 downto 0) & blueVector(7 downto 0);
+					ram_we <= '1';
+					ram_write_addr <= x"00";
+					wstate <= storingFade;
+--				elsif (mode24='1') then
+--					wstate <= idle24;
+--				elsif (modeAll='1') then
+--					wstate <= idleAll;
+--				elsif (modeAuto='1') then
+--					wstate <= idleAuto;
+--				elsif (modeGrad= '1') then
+--					wstate <= idleGrad;
+--				elsif (modeFade= '1') then
+--					wstate <= idleFade;
+--				end if
+				end if;
+				
+			when storingFade =>
+				if(ram_write_addr = x"FF") then
+					ram_we <= '0';
+					wstate <= inAndOut;
+				else
+					ram_write_addr <= ram_write_addr + 1;
+				end if;
+				
+			when inAndOut =>
+			--ram_write_buffer <= "111111111111111111111111";
+				if (count = 1000) then
+					if(brighten = (false)) then
+						greenVector <= greenVector - 1;
+						blueVector <= blueVector - 1;
+						redVector <= redVector - 1;
+					
+					else
+						greenVector <= greenVector + 1;
+						blueVector <= blueVector + 1;
+						redVector <= redVector + 1;
+					end if;
+					count <= 0;
+				else
+					count <= count + 1;
+				end if;
+				
+				if(blueVector="11111111") or (redVector="11111111") or (greenVector="11111111") then --will detect if red vector becomes brightest or dimmest, then reverse direction. check if this is 6 binary bits or needs to be more or less (the "000000" vectors)
+					brighten <= (false);
+				end if;
+				
+				if (blueVector="00000000") or (redVector="00000000") or (greenVector="00000000") then
+					brighten <= (true);
+				end if;
+				
+				ram_write_buffer <= redVector(7 downto 0) & greenVector(7 downto 0) & blueVector(7 downto 0);
+				ram_we <= '1';
+				ram_write_addr <= x"00";
+				wstate<=storingFade;
 				
 			when others =>
 				wstate <= idle16;

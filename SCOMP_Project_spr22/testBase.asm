@@ -107,6 +107,24 @@ TurnOnAll:
 	JUMP    TurnOnAll
 	
 ;*******************************************************************************
+; TestAll: Tests the 16-bit all color feature for setting all pixel to a 16-bit color.
+; Verifies all pixel functionality because no pixel address (PXL_A) is set, but a 16-bit color is set to all pixels with PXL_D.
+;*******************************************************************************
+
+TestFade:
+    LOADI   1
+    OUT     MODE_FADE_EN
+	
+    LOAD    Red
+    OUT     PXL_D
+	
+TurnOnFade:
+	IN     	Switches
+    AND    	Mask5
+	JZERO   ClearAll
+	JUMP    TurnOnFade
+	
+;*******************************************************************************
 ; Test16: Tests the 16-bit color feature for setting any single pixel to a 16-bit color.
 ; Verifies functionality by selecting different pixels with PXL_A, and setting them to different colors with PXL_D.
 ;*******************************************************************************
@@ -206,9 +224,10 @@ Zero:       DW &B0000000000
 
 
 
-PXL_A:     EQU &H0B0
-PXL_D:     EQU &H0B1
-MODE_16_EN: EQU &H0B5
-MODE_24_EN: EQU &H0B6
-MODE_ALL_EN: EQU &H0B7
-MODE_AUTO_EN:	EQU &H0B8
+PXL_A:        EQU &H0B0
+PXL_D:        EQU &H0B1
+MODE_16_EN:   EQU &H0B5
+MODE_24_EN:   EQU &H0B6
+MODE_ALL_EN:  EQU &H0B7
+MODE_AUTO_EN: EQU &H0B8
+MODE_FADE_EN: EQU &H0BC
