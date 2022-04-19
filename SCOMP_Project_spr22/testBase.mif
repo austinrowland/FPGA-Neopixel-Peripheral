@@ -1,0 +1,120 @@
+-- Altera Memory Initialization File (MIF)
+
+DEPTH = 2048;
+WIDTH = 16;
+
+ADDRESS_RADIX = HEX;
+DATA_RADIX = HEX;
+
+CONTENT
+  BEGIN
+    [000..7FF] : 0000;  -- Default to NOP
+
+           000 : 9000;  -- 	IN     	Switches
+           001 : 485E;  --     AND    	Mask1
+           002 : 383A;  --     JPOS   	Test16
+           003 : 9000;  -- 	IN     	Switches
+           004 : 485F;  --     AND    	Mask2
+           005 : 3814;  --     JPOS   	Test24
+           006 : 9000;  -- 	IN     	Switches
+           007 : 4860;  --     AND    	Mask3
+           008 : 3832;  --     JPOS   	TestAll
+           009 : 9000;  -- 	IN     	Switches
+           00A : 4861;  --     AND    	Mask4
+           00B : 384C;  --     JPOS   	TestAuto
+           00C : 2800;  -- 	JUMP   	Body
+           00D : B801;  -- 	LOADI   1
+           00E : 98B7;  -- 	OUT     MODE_ALL_EN
+           00F : 086A;  -- 	LOAD    Zero
+           010 : 98B1;  -- 	OUT     PXL_D
+           011 : B800;  -- 	LOADI   0
+           012 : 98B7;  -- 	OUT     MODE_ALL_EN
+           013 : 2800;  -- 	JUMP    Body
+           014 : B801;  -- 	LOADI   1
+           015 : 98B6;  -- 	OUT     MODE_24_EN
+           016 : B803;  --     LOADI   3
+           017 : 98B0;  --     OUT     PXL_A
+           018 : 0864;  --     LOAD	Red
+           019 : 98B1;  -- 	OUT 	PXL_D
+           01A : 0866;  -- 	LOAD	Blue
+           01B : 98B1;  --     OUT     PXL_D
+           01C : 0865;  -- 	LOAD	Green
+           01D : 98B1;  -- 	OUT 	PXL_D
+           01E : B804;  -- 	LOADI   4
+           01F : 98B0;  --     OUT     PXL_A
+           020 : 0867;  -- 	LOAD	Red1
+           021 : 98B1;  -- 	OUT 	PXL_D
+           022 : 0869;  -- 	LOAD	Blue1
+           023 : 98B1;  --     OUT     PXL_D
+           024 : 0868;  -- 	LOAD	Green1
+           025 : 98B1;  -- 	OUT 	PXL_D
+           026 : B806;  -- 	LOADI   6
+           027 : 98B0;  --     OUT     PXL_A
+           028 : 0867;  -- 	LOAD	Red1
+           029 : 98B1;  -- 	OUT 	PXL_D
+           02A : 0869;  -- 	LOAD	Blue1
+           02B : 98B1;  --     OUT     PXL_D
+           02C : 0868;  -- 	LOAD	Green1
+           02D : 98B1;  -- 	OUT 	PXL_D
+           02E : 9000;  -- 	IN     	Switches
+           02F : 485F;  --     AND    	Mask2
+           030 : 400D;  -- 	JZERO   ClearAll
+           031 : 2814;  -- 	JUMP    Test24
+           032 : B801;  -- 	LOADI   1
+           033 : 98B7;  -- 	OUT     MODE_ALL_EN
+           034 : 0864;  -- 	LOAD	Red
+           035 : 98B1;  -- 	OUT 	PXL_D
+           036 : 9000;  -- 	IN     	Switches
+           037 : 4860;  --     AND    	Mask3
+           038 : 400D;  -- 	JZERO   ClearAll
+           039 : 2836;  -- 	JUMP    TurnOnAll
+           03A : B801;  -- 	LOADI   1
+           03B : 98B5;  -- 	OUT     MODE_16_EN
+           03C : B801;  -- 	LOADI   1
+           03D : 98B0;  -- 	OUT 	PXL_A
+           03E : 0867;  -- 	LOAD	Red1
+           03F : 98B1;  -- 	OUT 	PXL_D
+           040 : B804;  -- 	LOADI   4
+           041 : 98B0;  -- 	OUT 	PXL_A
+           042 : 0868;  -- 	LOAD	Green1
+           043 : 98B1;  -- 	OUT		PXL_D
+           044 : B807;  -- 	LOADI   7
+           045 : 98B0;  -- 	OUT 	PXL_A
+           046 : 0864;  -- 	LOAD	Red
+           047 : 98B1;  -- 	OUT		PXL_D
+           048 : 9000;  -- 	IN     	Switches
+           049 : 485E;  --     AND    	Mask1
+           04A : 400D;  -- 	JZERO   ClearAll
+           04B : 283A;  -- 	JUMP    Test16
+           04C : B801;  -- 	LOADI   1
+           04D : 98B8;  -- 	OUT     MODE_AUTO_EN
+           04E : 0864;  --     LOAD	Red
+           04F : 98B1;  -- 	OUT 	PXL_D
+           050 : B803;  -- 	LOADI   3
+           051 : 8057;  -- 	CALL 	DelayAC
+           052 : 98B1;  -- 	OUT 	PXL_D
+           053 : 9000;  -- 	IN     	Switches
+           054 : 4861;  --     AND    	Mask4
+           055 : 400D;  -- 	JZERO   ClearAll
+           056 : 284C;  -- 	JUMP    TestAuto
+           057 : 105D;  -- 	STORE  DelayTime   ; Save the desired delay
+           058 : 9802;  -- 	OUT    Timer       ; Reset the timer
+           059 : 9002;  -- 	IN     Timer       ; Get the current timer value
+           05A : 205D;  -- 	SUB    DelayTime
+           05B : 3059;  -- 	JNEG   WaitingLoop ; Repeat until timer = delay value
+           05C : 8800;  -- 	RETURN
+           05D : 0005;  -- DelayTime: DW 5
+           05E : 0001;  -- Mask1:     DW &B0000000001
+           05F : 0002;  -- Mask2:     DW &B0000000010
+           060 : 0004;  -- Mask3:     DW &B0000000100
+           061 : 0008;  -- Mask4:     DW &B0000001000
+           062 : 0010;  -- Mask5:     DW &B0000010000
+           063 : 0020;  -- Mask6:     DW &B0000100000
+           064 : 8000;  -- Red:       DW &B1000000000000000
+           065 : 0200;  -- Green:     DW &B1000000000
+           066 : 0010;  -- Blue:       DW &B0000010000
+           067 : 001D;  -- Red1:       DW &B00011101
+           068 : 00CF;  -- Green1:     DW &B11001111
+           069 : 00EB;  -- Blue1:      DW &B11101011
+           06A : 0000;  -- Zero:       DW &B0000000000
+  END;

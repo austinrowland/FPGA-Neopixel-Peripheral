@@ -6,7 +6,7 @@ JedecChain;
 	P ActionCode(Ign)
 		Device PartName(SOCVHPS) MfrSpec(OpMask(0));
 	P ActionCode(Cfg)
-		Device PartName(5CSXFC6D6F31) Path("//prism.nas.gatech.edu/cmittal8/ECE/Downloads/ece2031-apuroop (1)/ece2031-apuroop/SCOMP_Project_spr22/output_files/") File("SCOMP.sof") MfrSpec(OpMask(1));
+		Device PartName(5CSXFC6D6F31) Path("C:/Users/austi/OneDrive/Documents/ECE2031/ece2031/SCOMP_Project_spr22/output_files/") File("SCOMP.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 

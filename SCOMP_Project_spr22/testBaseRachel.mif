@@ -1,0 +1,94 @@
+-- Altera Memory Initialization File (MIF)
+
+DEPTH = 2048;
+WIDTH = 16;
+
+ADDRESS_RADIX = HEX;
+DATA_RADIX = HEX;
+
+CONTENT
+  BEGIN
+    [000..7FF] : 0000;  -- Default to NOP
+
+           000 : 9000;  -- 	IN     Switches ; in switches again to check for second switch
+           001 : 4849;  --     AND    Mask4
+           002 : 3832;  --     JPOS   Test24 ; jumps to 24-bit color test
+           003 : 9000;  -- 	IN     Switches ; in switches again to check for second switch
+           004 : 4848;  --     AND    Mask3
+           005 : 3829;  --     JPOS   TestAuto ; jumps to auto increment test
+           006 : 9000;  -- 	IN     Switches ; in switches again to check for second switch
+           007 : 4847;  --     AND    Mask2
+           008 : 3818;  --     JPOS   Test16 ; jumps to 16-bit color test
+           009 : 9000;  -- 	IN     Switches ; in switches again to check for second switch
+           00A : 4846;  --     AND    Mask1
+           00B : 3811;  --     JPOS   TestAll ; jumps to all pixel test
+           00C : B801;  -- 	LOADI   1
+           00D : 98B7;  -- 	OUT     MODE_ALL_EN
+           00E : 0850;  -- 	LOAD	Zero
+           00F : 98B1;  -- 	OUT 	PXL_D
+           010 : 2800;  -- 	JUMP 	Start
+           011 : B801;  -- 	LOADI   1
+           012 : 98B7;  -- 	OUT     MODE_ALL_EN
+           013 : 084A;  -- 	LOAD	Red
+           014 : 98B1;  -- 	OUT 	PXL_D
+           015 : 9000;  -- 	IN      Switches
+           016 : 400C;  -- 	JZERO	ClearAll
+           017 : 2800;  -- 	JUMP 	Start
+           018 : B801;  -- 	LOADI   1
+           019 : 98B5;  -- 	OUT     MODE_16_EN
+           01A : B801;  -- 	LOADI   1
+           01B : 98B0;  -- 	OUT 	PXL_A
+           01C : 084D;  -- 	LOAD	Red1
+           01D : 98B1;  -- 	OUT 	PXL_D
+           01E : B804;  -- 	LOADI   4
+           01F : 98B0;  -- 	OUT 	PXL_A
+           020 : 084E;  -- 	LOAD	Green1
+           021 : 98B1;  -- 	OUT		PXL_D
+           022 : B807;  -- 	LOADI   7
+           023 : 98B0;  -- 	OUT 	PXL_A
+           024 : 084A;  -- 	LOAD	Red
+           025 : 98B1;  -- 	OUT		PXL_D
+           026 : 9000;  -- 	IN      Switches
+           027 : 400C;  -- 	JZERO	ClearAll
+           028 : 2800;  -- 	JUMP 	Start
+           029 : B801;  -- 	LOADI   1
+           02A : 98B8;  -- 	OUT     MODE_AUTO_EN
+           02B : 084D;  --     LOAD	Red1
+           02C : 98B1;  -- 	OUT 	PXL_D
+           02D : B805;  -- 	LOADI 	5
+           02E : 803F;  -- 	CALL 	DelayAC
+           02F : 9000;  -- 	IN      Switches
+           030 : 400C;  -- 	JZERO	ClearAll
+           031 : 2800;  -- 	JUMP 	Start
+           032 : B801;  -- 	LOADI   1
+           033 : 98B6;  -- 	OUT     MODE_24_EN
+           034 : B803;  --     LOADI   3
+           035 : 98B0;  --     OUT     PXL_A
+           036 : 084A;  --     LOAD	Red
+           037 : 98B1;  -- 	OUT 	PXL_D
+           038 : 084C;  -- 	LOAD	Blue
+           039 : 98B1;  --     OUT     PXL_D
+           03A : 084B;  -- 	LOAD	Green
+           03B : 98B1;  -- 	OUT 	PXL_D
+           03C : 9000;  --     IN      Switches
+           03D : 400C;  -- 	JZERO	ClearAll
+           03E : 2800;  -- 	JUMP    Start
+           03F : 1045;  -- 	STORE  DelayTime   ; Save the desired delay
+           040 : 9802;  -- 	OUT    Timer       ; Reset the timer
+           041 : 9002;  -- 	IN     Timer       ; Get the current timer value
+           042 : 2045;  -- 	SUB    DelayTime
+           043 : 3041;  -- 	JNEG   WaitingLoop ; Repeat until timer = delay value
+           044 : 8800;  -- 	RETURN
+           045 : 0005;  -- DelayTime: DW 5
+           046 : 0001;  -- Mask1:     DW &B0000000001
+           047 : 0002;  -- Mask2:     DW &B0000000010
+           048 : 0004;  -- Mask3:     DW &B0000000100
+           049 : 0008;  -- Mask4:     DW &B0000001000
+           04A : 8000;  -- Red:       DW &B1000000000000000
+           04B : 0200;  -- Green:     DW &B1000000000
+           04C : 0010;  -- Blue:       DW &B0000010000
+           04D : 001D;  -- Red1:       DW &B00011101
+           04E : 00CF;  -- Green1:     DW &B11001111
+           04F : 00EB;  -- Blue1:      DW &B11101011
+           050 : 0000;  -- Zero:       DW &B0000000000
+  END;

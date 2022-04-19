@@ -264,17 +264,6 @@ begin
 					elsif (cs_addr='1') then
 						ram_write_addr <= data_in(7 downto 0);
 					end if;
-			
-			-- If SCOMP is reading from the memory register...
---				
---				elsif (io_write = '0') then
---					if (cs_data='1') then
---						ram_write_addr <= ram_write_addr + 1;
---			
---			-- SCOMP incrementing after the writing state
---				
---				elsif (wstate = storing16) then
---					ram_write_addr <= ram_write_addr + 1;
 				end if;
 			
 			when storing16 =>
@@ -312,7 +301,7 @@ begin
 				-- storing data on this clock edge, so ram_we can go low at the
 				-- same time.
 				ram_we <= '0';
-				wstate <= idle24;
+				wstate <= idle16;
 				
 			when idleAll =>
 				if(io_write = '1') and (cs_data = '1') then
@@ -325,7 +314,7 @@ begin
 			when storingAll =>
 				if(ram_write_addr = x"FF") then
 					ram_we <= '0';
-					wstate <= idleAll;
+					wstate <= idle16;
 				end if;
 				ram_write_addr <= ram_write_addr + 1;
 				
@@ -354,19 +343,13 @@ begin
 					end if;
 				end if;
 			
---			-- SCOMP incrementing after the writing state
---				
---				if (wstate = storingAuto) then
---					ram_write_addr <= ram_write_addr + 1;
---				end if;
-			
 			when storingAuto =>
 				-- All that's needed here is to lower ram_we.  The RAM will be
 				-- storing data on this clock edge, so ram_we can go low at the
 				-- same time.
 				ram_we <= '0';
 				ram_write_addr <= ram_write_addr + 1;
-				wstate <= idleAuto;
+				wstate <= idle16;
 				
 			when others =>
 				wstate <= idle16;
