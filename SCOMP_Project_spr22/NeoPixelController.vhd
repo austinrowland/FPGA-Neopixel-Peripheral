@@ -23,7 +23,9 @@ entity NeoPixelController is
 		mode24	 : in   std_logic;
 		modeAll	 : in	  std_logic;
 		modeAuto	 : in	  std_logic;
-		modeFade	 : in	  std_logic
+		modeGrad  : in   std_logic;
+		modeFade	 : in	  std_logic;
+		modeFlow	 : in	  std_logic
 	); 
 
 end entity;
@@ -34,7 +36,7 @@ architecture internals of NeoPixelController is
 	signal ram_read_addr, ram_write_addr : std_logic_vector(7 downto 0);
 	-- RAM write enable
 	signal ram_we : std_logic;
-	signal red, green, blue: boolean;
+	signal red, green, blue, brighten, increment: boolean;
 	signal redVector, greenVector, blueVector: std_logic_vector(7 downto 0);
 
 	-- Signals for data coming out of memory
@@ -46,7 +48,7 @@ architecture internals of NeoPixelController is
 	signal ram_write_buffer : std_logic_vector(23 downto 0);
 
 	-- RAM interface state machine signals
-	type write_states is (idle16, storing16, idle24, storing24, idleAll, storingAll,idleAuto, storingAuto, idleFade, storingFade, inAndOut);
+	type write_states is (idle16, storing16, idle24, storing24, idleAll, storingAll,idleAuto, storingAuto, idleGrad, storingGrad, idleFade, storingFade, inAndOut, idleFlow, storingFlow, colorFlow);
 	signal wstate: write_states;
 	
 	signal count : integer range 0 to 1001;
@@ -241,6 +243,7 @@ begin
 			blue <= (false);
 			green <= (false);
 			brighten <= (false);
+			increment <= (false);
 			count <= 0;
 			-- Note that resetting this device does NOT clear the memory.
 			-- Clearing memory would require cycling through each address
@@ -266,6 +269,12 @@ begin
 						wstate <= idleAll;
 					elsif (modeAuto='1') then
 						wstate <= idleAuto;
+					elsif (modeGrad='1') then
+						wstate <= idleGrad;
+					elsif (modeFade='1') then
+						wstate <= idleFade;
+					elsif (modeFlow= '1') then
+						wstate <= idleFlow;
 					elsif (cs_addr='1') then
 						ram_write_addr <= data_in(7 downto 0);
 					end if;
@@ -417,6 +426,178 @@ begin
 				ram_write_addr <= x"00";
 				wstate<=storingFade;
 				
+			when idleFlow =>
+
+                if(io_write = '1') and (cs_data = '1') then
+                    greenVector <= data_in(10 downto 5) & "00";
+                    blueVector <= data_in(15 downto 11) & "000";
+                    redVector <= data_in(4 downto 0) & "111";
+                    ram_write_buffer <= redVector(7 downto 0) & greenVector(7 downto 0) & blueVector(7 downto 0);
+                    ram_we <= '1';
+                    ram_write_addr <= x"00";
+                    wstate <= storingFlow;
+                end if;
+
+            when storingFlow =>
+
+                if(ram_write_addr = x"FF") then
+                    ram_we <= '0';
+                    wstate <= colorFlow;
+                else 
+                    ram_write_addr <= ram_write_addr + 1; 
+                end if;
+					 
+			 when colorFlow =>
+
+			 if (count = 500) then
+
+				  if ((redVector = "11111111") and (greenVector = "00000000" or greenVector < "11111111") and (blueVector = "00000000")) then --red 
+
+						greenVector <= greenVector + 1;
+
+				  elsif ((redVector = "11111111" or redVector > "00000000") and (greenVector = "11111111") and (blueVector = "00000000")) then --yellow
+
+						redVector <= redVector - 1;
+
+				  elsif ((redVector = "00000000") and (greenVector = "11111111") and (blueVector = "00000000" or blueVector < "11111111")) then --green
+
+						blueVector <= blueVector + 1;
+
+				  elsif ((redVector = "00000000") and (greenVector = "11111111" or greenVector > "00000000") and (blueVector = "11111111")) then --cyan 
+
+						greenVector <= greenVector - 1;
+
+				  elsif ((redVector = "00000000" or redVector < "11111111") and (greenVector = "00000000") and (blueVector = "11111111")) then --blue
+
+						redVector <= redVector + 1;
+
+				  elsif ((redVector = "11111111") and (greenVector = "00000000") and (blueVector = "11111111" or blueVector > "00000000")) then --pink
+
+						blueVector <= blueVector - 1;
+				  else 
+
+						redVector <= "11111111";
+						greenVector <= "00000000";
+						blueVector <= "00000000";
+
+              end if;
+                  count <= 0;
+
+              else
+                  count <= count + 1;
+              end if;
+
+                ram_write_buffer <= redVector(7 downto 0) & greenVector(7 downto 0) & blueVector(7 downto 0);
+                ram_we <= '1';
+                ram_write_addr <= x"00";
+                wstate <= storingFlow;
+
+			 when idleGrad =>
+            
+                if(io_write = '1') and (cs_data = '1') then
+                
+                    greenVector <= "00" & data_in(10 downto 5);
+                    blueVector <= "000" & data_in(15 downto 11);
+                    redVector <= "000" & data_in(4 downto 0);
+                    
+                    ram_write_buffer <= redVector(7 downto 0) & greenVector(7 downto 0) & blueVector(7 downto 0);
+--                    ram_write_buffer <= data_in(10 downto 5) & "00" & data_in(15 downto 11) & "000" & data_in(4 downto 0) & "000";
+                    ram_we <= '1';
+                    ram_write_addr <= x"00";
+--                    ram_write_addr <= ram_write_addr + 1;
+
+                    wstate <= storingGrad;
+                    
+                end if;
+            
+            when storingGrad =>
+                
+                if(ram_write_addr = x"FF") then
+                    ram_we <= '0';
+                    wstate <= idleGrad;
+                end if;
+                -- update color by incrememnt here?
+                
+                ram_write_addr <= ram_write_addr + 1;
+--                
+                if(((greenVector) > 128) and ((blueVector) > 128) and ((redVector) > 128)) then -- if all colors are greater than 128        
+                
+                    increment <= (false);
+                    
+                    if(((greenVector)) > ((redVector))) then -- if green is greater than red ; we want the highest
+                        if ((greenVector) >= ((blueVector))) then -- if green is greater than blue 
+--                            bestVector <= greenVector;
+--                            green <= (true);
+                            greenVector <= greenVector - 1;
+                        else 
+--                            bestVector <= blueVector;
+--                            blue <= (true);
+                            blueVector <= blueVector - 1;
+                        end if; 
+                    else 
+                        if ((redVector) >= ((blueVector))) then
+--                            bestVector <= redVector;
+--                            red <= (true);
+                            redVector <= redVector - 1;
+                        else 
+--                            bestVector <= blueVector;
+--                            blue <= (true);
+                            blueVector <= blueVector - 1;
+    
+                        end if;
+                    end if;
+                    
+                elsif(((greenVector) < 128) and ((blueVector) < 128) and ((redVector) < 128)) then -- if all colors less than 128
+                
+                    increment <= (true);
+                    
+                    if((greenVector) < ((redVector))) then -- if green is greater than red ; we want the highest
+                        if ((greenVector) <= ((blueVector))) then -- if green is greater than blue 
+--                            bestVector <= greenVector;
+--                            green <= (true);
+                            greenVector <= greenVector + 1;
+
+                        else 
+--                            bestVector <= blueVector;
+--                            blue <= (true);
+                            blueVector <= blueVector + 1;
+    
+                        end if; 
+                    else 
+                        if ((redVector) <= (blueVector)) then
+--                            bestVector <= redVector;
+--                            red <= (true);
+                            redVector <= redVector + 1;
+
+                        else 
+--                            bestVector <= blueVector;
+--                            blue <= (true);
+                            blueVector <= blueVector + 1;
+    
+                        end if; 
+                    end if;
+                    
+                else -- if all are whatever idk 
+                
+                    increment <= (true);
+                    
+                    if((greenVector) < ((redVector))) then 
+                        if ((greenVector) <= ((blueVector))) then 
+--                            bestVector <= greenVector;
+--                            green <= (true);
+                            greenVector <= greenVector + 1;
+
+                        else 
+--                            bestVector <= blueVector;
+--                            blue <= (true);
+                            blueVector <= blueVector + 1;
+    
+                        end if; 
+							end if;
+						end if;
+						
+                ram_write_buffer <= redVector(7 downto 0) & greenVector(7 downto 0) & blueVector(7 downto 0);
+                wstate <= storingGrad;				
 			when others =>
 				wstate <= idle16;
 			end case;
