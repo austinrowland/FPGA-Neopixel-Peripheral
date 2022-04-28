@@ -11,30 +11,30 @@ CONTENT
     [000..7FF] : 0000;  -- Default to NOP
 
            000 : 9000;  -- 	IN     	Switches
-           001 : 487E;  --     AND    	Mask1
+           001 : 487F;  --     AND    	Mask1
            002 : 384B;  --     JPOS   	Test16
            003 : 9000;  -- 	IN     	Switches
-           004 : 487F;  --     AND    	Mask2
+           004 : 4880;  --     AND    	Mask2
            005 : 381D;  --     JPOS   	Test24
            006 : 9000;  -- 	IN     	Switches
-           007 : 4880;  --     AND    	Mask3
+           007 : 4881;  --     AND    	Mask3
            008 : 383B;  --     JPOS   	TestAll
            009 : 9000;  -- 	IN     	Switches
-           00A : 4881;  --     AND    	Mask4
+           00A : 4882;  --     AND    	Mask4
            00B : 385D;  --     JPOS   	TestAuto
            00C : 9000;  -- 	IN     	Switches
-           00D : 4882;  --     AND    	Mask5
+           00D : 4883;  --     AND    	Mask5
            00E : 3843;  --     JPOS   	TestFade
            00F : 9000;  -- 	IN		Switches
-           010 : 4883;  -- 	AND		Mask6
+           010 : 4884;  -- 	AND		Mask6
            011 : 3868;  -- 	JPOS	TestGrad
            012 : 9000;  -- 	IN		Switches
-           013 : 4884;  -- 	AND		Mask7
-           014 : 386F;  -- 	JPOS	TestFlow
+           013 : 4885;  -- 	AND		Mask7
+           014 : 3870;  -- 	JPOS	TestFlow
            015 : 2800;  -- 	JUMP   	Body
            016 : B801;  -- 	LOADI   1
            017 : 98B7;  -- 	OUT     MODE_ALL_EN
-           018 : 088B;  -- 	LOAD    Zero
+           018 : 088C;  -- 	LOAD    Zero
            019 : 98B1;  -- 	OUT     PXL_D
            01A : B800;  -- 	LOADI   0
            01B : 98B7;  -- 	OUT     MODE_ALL_EN
@@ -43,114 +43,115 @@ CONTENT
            01E : 98B6;  -- 	OUT     MODE_24_EN
            01F : B803;  --     LOADI   3
            020 : 98B0;  --     OUT     PXL_A
-           021 : 0885;  --     LOAD	Red
+           021 : 0886;  --     LOAD	Red
            022 : 98B1;  -- 	OUT 	PXL_D
-           023 : 0887;  -- 	LOAD	Blue
+           023 : 0888;  -- 	LOAD	Blue
            024 : 98B1;  --     OUT     PXL_D
-           025 : 0886;  -- 	LOAD	Green
+           025 : 0887;  -- 	LOAD	Green
            026 : 98B1;  -- 	OUT 	PXL_D
            027 : B804;  -- 	LOADI   4
            028 : 98B0;  --     OUT     PXL_A
-           029 : 0888;  -- 	LOAD	Red1
+           029 : 0889;  -- 	LOAD	Red1
            02A : 98B1;  -- 	OUT 	PXL_D
-           02B : 088A;  -- 	LOAD	Blue1
+           02B : 088B;  -- 	LOAD	Blue1
            02C : 98B1;  --     OUT     PXL_D
-           02D : 0889;  -- 	LOAD	Green1
+           02D : 088A;  -- 	LOAD	Green1
            02E : 98B1;  -- 	OUT 	PXL_D
            02F : B806;  -- 	LOADI   6
            030 : 98B0;  --     OUT     PXL_A
-           031 : 0888;  -- 	LOAD	Red1
+           031 : 0889;  -- 	LOAD	Red1
            032 : 98B1;  -- 	OUT 	PXL_D
-           033 : 088A;  -- 	LOAD	Blue1
+           033 : 088B;  -- 	LOAD	Blue1
            034 : 98B1;  --     OUT     PXL_D
-           035 : 0889;  -- 	LOAD	Green1
+           035 : 088A;  -- 	LOAD	Green1
            036 : 98B1;  -- 	OUT 	PXL_D
            037 : 9000;  -- 	IN     	Switches
-           038 : 487F;  --     AND    	Mask2
+           038 : 4880;  --     AND    	Mask2
            039 : 4016;  -- 	JZERO   ClearAll
            03A : 281D;  -- 	JUMP    Test24
            03B : B801;  -- 	LOADI   1
            03C : 98B7;  -- 	OUT     MODE_ALL_EN
-           03D : 0885;  -- 	LOAD	Red
+           03D : 0886;  -- 	LOAD	Red
            03E : 98B1;  -- 	OUT 	PXL_D
            03F : 9000;  -- 	IN     	Switches
-           040 : 4880;  --     AND    	Mask3
+           040 : 4881;  --     AND    	Mask3
            041 : 4016;  -- 	JZERO   ClearAll
            042 : 283F;  -- 	JUMP    TurnOnAll
            043 : B801;  --     LOADI   1
            044 : 98BC;  --     OUT     MODE_FADE_EN
-           045 : 0885;  --     LOAD    Red
+           045 : 0886;  --     LOAD    Red
            046 : 98B1;  --     OUT     PXL_D
            047 : 9000;  -- 	IN     	Switches
-           048 : 4882;  --     AND    	Mask5
+           048 : 4883;  --     AND    	Mask5
            049 : 4016;  -- 	JZERO   ClearAll
            04A : 2847;  -- 	JUMP    TurnOnFade
            04B : B801;  -- 	LOADI   1
            04C : 98B5;  -- 	OUT     MODE_16_EN
            04D : B801;  -- 	LOADI   1
            04E : 98B0;  -- 	OUT 	PXL_A
-           04F : 0888;  -- 	LOAD	Red1
+           04F : 0889;  -- 	LOAD	Red1
            050 : 98B1;  -- 	OUT 	PXL_D
            051 : B804;  -- 	LOADI   4
            052 : 98B0;  -- 	OUT 	PXL_A
-           053 : 0889;  -- 	LOAD	Green1
+           053 : 088A;  -- 	LOAD	Green1
            054 : 98B1;  -- 	OUT		PXL_D
            055 : B807;  -- 	LOADI   7
            056 : 98B0;  -- 	OUT 	PXL_A
-           057 : 0885;  -- 	LOAD	Red
+           057 : 0886;  -- 	LOAD	Red
            058 : 98B1;  -- 	OUT		PXL_D
            059 : 9000;  -- 	IN     	Switches
-           05A : 487E;  --     AND    	Mask1
+           05A : 487F;  --     AND    	Mask1
            05B : 4016;  -- 	JZERO   ClearAll
            05C : 284B;  -- 	JUMP    Test16
            05D : B801;  -- 	LOADI   1
            05E : 98B8;  -- 	OUT     MODE_AUTO_EN
-           05F : 0885;  --     LOAD	Red
+           05F : 0886;  --     LOAD	Red
            060 : 98B1;  -- 	OUT 	PXL_D
            061 : B803;  -- 	LOADI   3
-           062 : 8077;  -- 	CALL 	DelayAC
+           062 : 8078;  -- 	CALL 	DelayAC
            063 : 98B1;  -- 	OUT 	PXL_D
            064 : 9000;  -- 	IN     	Switches
-           065 : 4881;  --     AND    	Mask4
+           065 : 4882;  --     AND    	Mask4
            066 : 4016;  -- 	JZERO   ClearAll
            067 : 285D;  -- 	JUMP    TestAuto
-           068 : 98B9;  -- 	OUT 	MODE_GRAD_EN
-           069 : 0885;  -- 	LOAD    Red
-           06A : 98B1;  -- 	OUT     PXL_D
-           06B : 9000;  -- 	IN     	Switches
-           06C : 4883;  --     AND    	Mask6
-           06D : 4016;  -- 	JZERO   ClearAll
-           06E : 2868;  -- 	JUMP    TestGrad
-           06F : B801;  -- 	LOADI   1
-           070 : 98BB;  -- 	OUT 	MODE_FLOW_EN
-           071 : 0888;  -- 	LOAD    Red1
-           072 : 98B1;  -- 	OUT     PXL_D
-           073 : 9000;  -- 	IN     	Switches
-           074 : 4884;  --     AND    	Mask7
-           075 : 4016;  -- 	JZERO   ClearAll
-           076 : 286F;  -- 	JUMP    TestFlow
-           077 : 107D;  -- 	STORE  DelayTime   ; Save the desired delay
-           078 : 9802;  -- 	OUT    Timer       ; Reset the timer
-           079 : 9002;  -- 	IN     Timer       ; Get the current timer value
-           07A : 207D;  -- 	SUB    DelayTime
-           07B : 3079;  -- 	JNEG   WaitingLoop ; Repeat until timer = delay value
-           07C : 8800;  -- 	RETURN
-           07D : 0005;  -- DelayTime: DW 5
-           07E : 0001;  -- Mask1:     DW &B0000000001
-           07F : 0002;  -- Mask2:     DW &B0000000010
-           080 : 0004;  -- Mask3:     DW &B0000000100
-           081 : 0008;  -- Mask4:     DW &B0000001000
-           082 : 0010;  -- Mask5:     DW &B0000010000
-           083 : 0020;  -- Mask6:     DW &B0000100000
-           084 : 0040;  -- Mask7:     DW &B0001000000
-           085 : 8000;  -- Red:       DW &B1000000000000000
-           086 : 0200;  -- Green:     DW &B1000000000
-           087 : 0010;  -- Blue:       DW &B0000010000
-           088 : 001D;  -- Red1:       DW &B00011101
-           089 : 00CF;  -- Green1:     DW &B11001111
-           08A : 00EB;  -- Blue1:      DW &B11101011
-           08B : 0000;  -- Zero:       DW &B0000000000
-           08C : 0051;  -- Pret1:		DW &B01010001
-           08D : 00D4;  -- Pret2:		DW &B11010100
-           08E : BBFD;  -- Pret3:		DW &B101001111011101111111101
+           068 : B801;  -- 	LOADI   1
+           069 : 98B9;  -- 	OUT 	MODE_GRAD_EN
+           06A : 0886;  -- 	LOAD    Red
+           06B : 98B1;  -- 	OUT     PXL_D
+           06C : 9000;  -- 	IN     	Switches
+           06D : 4884;  --     AND    	Mask6
+           06E : 4016;  -- 	JZERO   ClearAll
+           06F : 2868;  -- 	JUMP    TestGrad
+           070 : B801;  -- 	LOADI   1
+           071 : 98BB;  -- 	OUT 	MODE_FLOW_EN
+           072 : 0889;  -- 	LOAD    Red1
+           073 : 98B1;  -- 	OUT     PXL_D
+           074 : 9000;  -- 	IN     	Switches
+           075 : 4885;  --     AND    	Mask7
+           076 : 4016;  -- 	JZERO   ClearAll
+           077 : 2870;  -- 	JUMP    TestFlow
+           078 : 107E;  -- 	STORE  DelayTime   ; Save the desired delay
+           079 : 9802;  -- 	OUT    Timer       ; Reset the timer
+           07A : 9002;  -- 	IN     Timer       ; Get the current timer value
+           07B : 207E;  -- 	SUB    DelayTime
+           07C : 307A;  -- 	JNEG   WaitingLoop ; Repeat until timer = delay value
+           07D : 8800;  -- 	RETURN
+           07E : 0005;  -- DelayTime: DW 5
+           07F : 0001;  -- Mask1:     DW &B0000000001
+           080 : 0002;  -- Mask2:     DW &B0000000010
+           081 : 0004;  -- Mask3:     DW &B0000000100
+           082 : 0008;  -- Mask4:     DW &B0000001000
+           083 : 0010;  -- Mask5:     DW &B0000010000
+           084 : 0020;  -- Mask6:     DW &B0000100000
+           085 : 0040;  -- Mask7:     DW &B0001000000
+           086 : 8000;  -- Red:       DW &B1000000000000000
+           087 : 0200;  -- Green:     DW &B1000000000
+           088 : 0010;  -- Blue:       DW &B0000010000
+           089 : 001D;  -- Red1:       DW &B00011101
+           08A : 00CF;  -- Green1:     DW &B11001111
+           08B : 00EB;  -- Blue1:      DW &B11101011
+           08C : 0000;  -- Zero:       DW &B0000000000
+           08D : 0051;  -- Pret1:		DW &B01010001
+           08E : 00D4;  -- Pret2:		DW &B11010100
+           08F : BBFD;  -- Pret3:		DW &B101001111011101111111101
   END;
