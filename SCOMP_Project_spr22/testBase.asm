@@ -1,10 +1,10 @@
 ORG 0
 	
-;*******************************************************************************
+;******************************************************************************************************************************************************
 ; Body: This is the main assembly loop that allows you to specify mode based on DE-10 switch input.
 ; This loop will reset all MODE_NAME_EN constants and then check switch input to jump to each mode.
 ; Only one switch at a time can be high, otherwise, priority is given to different modes in their sequential order of jump statements.
-;*******************************************************************************
+;******************************************************************************************************************************************************
 
 Body: 
 	;LOADI	0
@@ -43,9 +43,9 @@ Body:
 	
 	JUMP   	Body
 	
-;*******************************************************************************
+;******************************************************************************************************************************************************
 ; ClearAll: Clears all pixels on the Neopixel strip by setting color to black.
-;*******************************************************************************
+;******************************************************************************************************************************************************
 ClearAll: 
 	LOADI   1
 	OUT     MODE_ALL_EN
@@ -55,11 +55,11 @@ ClearAll:
 	OUT     MODE_ALL_EN
 	JUMP    Body
 	
-;*******************************************************************************
+;******************************************************************************************************************************************************
 ; Test24: Tests the 24-bit color feature for setting any single pixel to a 24-bit color.
 ; Verifies functionality by setting 3 different pixels to 3 different colors
 ; Colors are set by sending 3 8-bit color vectors (R, G, B) to PXL_D, and the color is displayed when 3 color vectors are given.
-;*******************************************************************************
+;******************************************************************************************************************************************************
 	
 Test24:
 	LOADI   1
@@ -95,10 +95,10 @@ Test24:
 	JZERO   ClearAll
 	JUMP    Test24
 
-;*******************************************************************************
+;******************************************************************************************************************************************************
 ; TestAll: Tests the 16-bit all color feature for setting all pixel to a 16-bit color.
 ; Verifies all pixel functionality because no pixel address (PXL_A) is set, but a 16-bit color is set to all pixels with PXL_D.
-;*******************************************************************************
+;******************************************************************************************************************************************************
 
 TestAll:
 	LOADI   1
@@ -118,10 +118,10 @@ TurnOnAll:
 	JZERO   ClearAll
 	JUMP    TurnOnAll
 	
-;*******************************************************************************
-; TestAll: Tests the 16-bit all color feature for setting all pixel to a 16-bit color.
+;******************************************************************************************************************************************************
+; TestFade: Tests the 16-bit all color feature for setting all pixel to a 16-bit color.
 ; Verifies all pixel functionality because no pixel address (PXL_A) is set, but a 16-bit color is set to all pixels with PXL_D.
-;*******************************************************************************
+;******************************************************************************************************************************************************
 
 TestFade:
     LOADI   1
@@ -136,10 +136,10 @@ TurnOnFade:
 	JZERO   ClearAll
 	JUMP    TurnOnFade
 	
-;*******************************************************************************
+;******************************************************************************************************************************************************
 ; Test16: Tests the 16-bit color feature for setting any single pixel to a 16-bit color.
 ; Verifies functionality by selecting different pixels with PXL_A, and setting them to different colors with PXL_D.
-;*******************************************************************************
+;******************************************************************************************************************************************************
 	
 Test16:
 	LOADI   1
@@ -158,22 +158,16 @@ Test16:
 	LOAD	Red
 	OUT		PXL_D
 	
-	;IN     Switches
-    ;AND    Mask1
-    ;JPOS   Test16
-	;CALL    ClearAll
-	;JUMP    Body
-	
 	IN     	Switches
     AND    	Mask1
 	JZERO   ClearAll
 	JUMP    Test16
 
-;*******************************************************************************
+;******************************************************************************************************************************************************
 ; TestAuto: Tests the auto-increment features for pixel address incrementation
 ; Verfies auto-increment functionality works because a pixel address (PXL_A) is never set but the pixels increment anyways
-; Will light up the first 10 pixels on the Neopixel.
-;*******************************************************************************
+; Will light up all the pixels on the Neopixel one-by-one.
+;******************************************************************************************************************************************************
 
 TestAuto:
 	LOADI   1
@@ -189,20 +183,33 @@ TestAuto:
     AND    	Mask4
 	JZERO   ClearAll
 	JUMP    TestAuto
+
+;******************************************************************************************************************************************************
+; TestGrad: Each pixel’s RGB vector increments or decrements from the color in the assembly code
+; Sets current pixel address’ data as updated color vector
+; Sent to RAM write buffer to update the LED strips on each clock cycle
+;******************************************************************************************************************************************************
 	
 TestGrad: 
 
-	;LOADI   1
+	LOADI   1
 	OUT 	MODE_GRAD_EN
 	
 	LOAD    Red
 	OUT     PXL_D
+	
 	
 Grady:
 	IN     	Switches
     AND    	Mask6
 	JZERO   ClearAll
 	JUMP    TestGrad
+
+;******************************************************************************************************************************************************
+; TestFlow: RGB color vectors updated by current 16 bit color vector
+; Color incremented/decremented based on current color
+; Sent to RAM write buffer to update the LED strips on each clock cycle
+;******************************************************************************************************************************************************
 	
 TestFlow:
 
@@ -220,11 +227,11 @@ Flowy:
 
 	
 	
-;*******************************************************************************
+;******************************************************************************************************************************************************
 ; DelayAC: Pause for some multiple of 0.1 seconds.
 ; Call this with the desired delay in AC.
 ; E.g. if AC is 10, this will delay for 10*0.1 = 1 second
-;*******************************************************************************
+;******************************************************************************************************************************************************
 
 DelayAC:
 	STORE  DelayTime   ; Save the desired delay
@@ -236,14 +243,7 @@ WaitingLoop:
 	RETURN
 DelayTime: DW 5
 
-
-
-; IO address constants
-Switches:  EQU 000
-LEDs:      EQU 001
-Timer:     EQU 002
-Hex0:      EQU 004
-Hex1:      EQU 005
+; Constant Values
 Mask1:     DW &B0000000001
 Mask2:     DW &B0000000010
 Mask3:     DW &B0000000100
@@ -264,7 +264,12 @@ Pret1:		DW &B01010001
 Pret2:		DW &B11010100
 Pret3:		DW &B101001111011101111111101
 
-
+; IO address constants
+Switches:  EQU 000
+LEDs:      EQU 001
+Timer:     EQU 002
+Hex0:      EQU 004
+Hex1:      EQU 005
 
 PXL_A:        EQU &H0B0
 PXL_D:        EQU &H0B1

@@ -1,5 +1,5 @@
 -- WS2812 communication interface starting point for
--- ECE 2031 final project spring 2022.
+-- ECE 2031 Final Project Spring 2022.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -67,6 +67,7 @@ begin
 		clock_enable_output_a => "BYPASS",
 		clock_enable_output_b => "BYPASS",
 		indata_reg_b => "CLOCK0",
+		-- IMPORTANT: The memory init_file must be updated in SCOMP.vhd, not in NeoPixelController.vhd!!!
 		init_file => "pixeldata.mif",
 		intended_device_family => "Cyclone V",
 		lpm_type => "altsyncram",
@@ -207,22 +208,6 @@ begin
 		-- For this implementation, saving the memory address
 		-- doesn't require anything special.  Just latch it when
 		-- SCOMP sends it.
---		if resetn = '0' then
---			ram_write_addr <= x"00";
---		elsif rising_edge(clk_10M) then
---			-- If SCOMP is writing to the address register...
---			if (io_write = '1') and (cs_addr='1') then
---				ram_write_addr <= data_in(7 downto 0);
---			-- If SCOMP is reading from the memory register...
---			elsif (io_write = '0') and (cs_data='1') then
---				ram_write_addr <= ram_write_addr + 1;
---			-- SCOMP incrementing after the writing state
---			elsif (wstate = storing16) then
---				ram_write_addr <= ram_write_addr + 1;
---			end if;
---		end if;
---	
-	
 		-- The sequnce of events needed to store data into memory will be
 		-- implemented with a state machine.
 		-- Although there are ways to more simply connect SCOMP's I/O system
@@ -251,6 +236,14 @@ begin
 		elsif rising_edge(clk_10M) then
 			case wstate is
 			
+-----------------------------------------------------------------------------------------------------------------
+-- Mode: Set 16-bit (DEFAULT)(Sets any single pixel to a 16-bit color)
+-- Assembly Use Inputs: OUT 1 to MODE_16_EN
+--                      OUT to PXL_A (sets the pixel address)
+--                      OUT to PXL_D (sets the 16-bit color)
+--                      Repeat PXL_A and PXL_D OUTs above to reuse.
+-----------------------------------------------------------------------------------------------------------------
+			
 			when idle16 =>
 				if (io_write = '1') then
 					if (cs_data='1') then
@@ -263,6 +256,7 @@ begin
 					ram_we <= '1';
 					-- Change state
 					wstate <= storing16;
+					-- Mode designation signal conditionals
 					elsif (mode24='1') then
 						wstate <= idle24;
 					elsif (modeAll='1') then
@@ -287,6 +281,16 @@ begin
 				ram_we <= '0';
 				wstate <= idle16;
 				
+-----------------------------------------------------------------------------------------------------------------
+-- Mode: Set 24-bit (Sets any single pixel to a 24-bit color using RGB vectors)
+-- Assembly Use Inputs: OUT 1 to MODE_24_EN
+--                      OUT to PXL_A (sets the pixel address)
+--                      OUT to PXL_D (sets the 24-bit color Red vector)
+--                      OUT to PXL_D (sets the 24-bit color Green vector)
+--                      OUT to PXL_D (sets the 24-bit color Blue vector)
+--                      Repeat PXL_A and PXL_D OUTs above to reuse.
+-----------------------------------------------------------------------------------------------------------------
+			
 			when idle24 =>
 				if (io_write = '1') and (cs_data='1') then
 					if (red = true) and (green = true) then
@@ -317,6 +321,13 @@ begin
 				ram_we <= '0';
 				wstate <= idle16;
 				
+-----------------------------------------------------------------------------------------------------------------
+-- Mode: Set All (Sets all pixels to a 16-bit color simultaneously)
+-- Assembly Use Inputs: OUT 1 to MODE_ALL_EN
+--                      OUT to PXL_D (sets the 16-bit color)
+--                      Repeat PXL_D OUTs above to reuse.
+-----------------------------------------------------------------------------------------------------------------
+			
 			when idleAll =>
 				if(io_write = '1') and (cs_data = '1') then
 					ram_write_buffer <= data_in(10 downto 5) & "00" & data_in(15 downto 11) & "000" & data_in(4 downto 0) & "000";
@@ -332,6 +343,15 @@ begin
 				end if;
 				ram_write_addr <= ram_write_addr + 1;
 				
+-----------------------------------------------------------------------------------------------------------------
+-- Mode: Auto-Increment (Pixel address increments when setting a color)
+-- Assembly Use Inputs: OUT 1 to MODE_AUTO_EN
+--                      OUT to PXL_D (sets the 16-bit color)
+--                      Repeat PXL_D OUTs above to reuse.
+--                      Calling a delay function will be good to create a visually distinctive use.
+--                      NOTE: DelayAC in TestBase.asm file is a good starting point for a delay function.
+-----------------------------------------------------------------------------------------------------------------
+			
 			when idleAuto =>
 				if (io_write = '1') then
 					if (cs_data='1') then
@@ -365,6 +385,13 @@ begin
 				ram_write_addr <= ram_write_addr + 1;
 				wstate <= idle16;
 				
+-----------------------------------------------------------------------------------------------------------------
+-- Mode: Continuous Color Fade (Increments/Decrements the Color Brightness)
+-- Assembly Use Inputs: OUT 1 to MODE_FADE_EN
+--                      OUT to PXL_D (sets the initial 16-bit color)
+--                      Modify PXL_D OUT above to reuse.
+-----------------------------------------------------------------------------------------------------------------
+			
 			when idleFade =>
 				if(io_write = '1') and (cs_data = '1') then
 					greenVector <= data_in(10 downto 5) & "00";
@@ -374,17 +401,6 @@ begin
 					ram_we <= '1';
 					ram_write_addr <= x"00";
 					wstate <= storingFade;
---				elsif (mode24='1') then
---					wstate <= idle24;
---				elsif (modeAll='1') then
---					wstate <= idleAll;
---				elsif (modeAuto='1') then
---					wstate <= idleAuto;
---				elsif (modeGrad= '1') then
---					wstate <= idleGrad;
---				elsif (modeFade= '1') then
---					wstate <= idleFade;
---				end if
 				end if;
 				
 			when storingFade =>
@@ -396,7 +412,6 @@ begin
 				end if;
 				
 			when inAndOut =>
-			--ram_write_buffer <= "111111111111111111111111";
 				if (count = 1000) then
 					if(brighten = (false)) then
 						greenVector <= greenVector - 1;
@@ -425,6 +440,13 @@ begin
 				ram_we <= '1';
 				ram_write_addr <= x"00";
 				wstate<=storingFade;
+				
+-----------------------------------------------------------------------------------------------------------------
+-- Mode: Continuous Color Flow (Flows between RGB color values)
+-- Assembly Use Inputs: OUT 1 to MODE_FLOW_EN
+--                      OUT to PXL_D (sets the initial 16-bit color)
+--                      Modify PXL_D OUT above to reuse.
+-----------------------------------------------------------------------------------------------------------------
 				
 			when idleFlow =>
 
@@ -492,6 +514,13 @@ begin
                 ram_write_addr <= x"00";
                 wstate <= storingFlow;
 
+-----------------------------------------------------------------------------------------------------------------
+-- Mode: Static Color Gradient (Sets a gradient pattern based on an initial color)
+-- Assembly Use Inputs: OUT 1 to MODE_24_EN
+--                      OUT to PXL_D (sets the base 16-bit color for the gradient)
+--                      Repeat PXL_D OUTs above to reuse.
+-----------------------------------------------------------------------------------------------------------------
+
 			 when idleGrad =>
             
                 if(io_write = '1') and (cs_data = '1') then
@@ -501,10 +530,8 @@ begin
                     redVector <= "000" & data_in(4 downto 0);
                     
                     ram_write_buffer <= redVector(7 downto 0) & greenVector(7 downto 0) & blueVector(7 downto 0);
---                    ram_write_buffer <= data_in(10 downto 5) & "00" & data_in(15 downto 11) & "000" & data_in(4 downto 0) & "000";
                     ram_we <= '1';
                     ram_write_addr <= x"00";
---                    ram_write_addr <= ram_write_addr + 1;
 
                     wstate <= storingGrad;
                     
@@ -516,32 +543,24 @@ begin
                     ram_we <= '0';
                     wstate <= idleGrad;
                 end if;
-                -- update color by incrememnt here?
+                -- update color by incrememnt here
                 
                 ram_write_addr <= ram_write_addr + 1;
---                
+        
                 if(((greenVector) > 128) and ((blueVector) > 128) and ((redVector) > 128)) then -- if all colors are greater than 128        
                 
                     increment <= (false);
                     
                     if(((greenVector)) > ((redVector))) then -- if green is greater than red ; we want the highest
                         if ((greenVector) >= ((blueVector))) then -- if green is greater than blue 
---                            bestVector <= greenVector;
---                            green <= (true);
                             greenVector <= greenVector - 1;
                         else 
---                            bestVector <= blueVector;
---                            blue <= (true);
                             blueVector <= blueVector - 1;
                         end if; 
                     else 
                         if ((redVector) >= ((blueVector))) then
---                            bestVector <= redVector;
---                            red <= (true);
                             redVector <= redVector - 1;
                         else 
---                            bestVector <= blueVector;
---                            blue <= (true);
                             blueVector <= blueVector - 1;
     
                         end if;
@@ -553,25 +572,17 @@ begin
                     
                     if((greenVector) < ((redVector))) then -- if green is greater than red ; we want the highest
                         if ((greenVector) <= ((blueVector))) then -- if green is greater than blue 
---                            bestVector <= greenVector;
---                            green <= (true);
                             greenVector <= greenVector + 1;
 
                         else 
---                            bestVector <= blueVector;
---                            blue <= (true);
                             blueVector <= blueVector + 1;
     
                         end if; 
                     else 
                         if ((redVector) <= (blueVector)) then
---                            bestVector <= redVector;
---                            red <= (true);
                             redVector <= redVector + 1;
 
                         else 
---                            bestVector <= blueVector;
---                            blue <= (true);
                             blueVector <= blueVector + 1;
     
                         end if; 
@@ -583,13 +594,9 @@ begin
                     
                     if((greenVector) < ((redVector))) then 
                         if ((greenVector) <= ((blueVector))) then 
---                            bestVector <= greenVector;
---                            green <= (true);
                             greenVector <= greenVector + 1;
 
                         else 
---                            bestVector <= blueVector;
---                            blue <= (true);
                             blueVector <= blueVector + 1;
     
                         end if; 
