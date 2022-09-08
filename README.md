@@ -4,6 +4,8 @@
 Project for Georgia Tech ECE 2031.
 
 ## Neopixel Modes
+An understanding of the different mode designations and their specific inputs (assembly) allow users to carry out different functionalities as described previously. A user can change the mode by sending an OUT of 1 to one of the several mode selections ports through chip select. Modes include:
+
 - Set 16-bit color: Sets a 16-bit color to an address using a single OUT to specify the address and a single OUT to specify the color
 - Set 24-bit color: Three OUT statements from the user and interprets them as RGB vectors, then sends that information to whichever pixel address is specified
 - Set All: Increments through all addresses and sets the color to each pixel that was specified in the OUT statement
