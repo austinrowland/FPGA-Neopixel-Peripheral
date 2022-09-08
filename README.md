@@ -2,8 +2,8 @@
 
 ## Project Overview
 Project for Georgia Tech ECE 2031. We created an FPGA Neopixel peripheral designed with Quartus Prime software using VHDL and ASM files. 
-The peripheral was as a state machine to switch between LED modes 
-Wrote assembly test scripts that verified both the internal functionality and the final output presented to the end user
+The peripheral was as a state machine to switch between LED modes.
+Wrote assembly test scripts that verified both the internal functionality and the final output presented to the end user.
 The Neopixel peripheral can achieve seven different modes of functionality, based on what the user wants to accomplish, by using mode designation signals. 
 
 
