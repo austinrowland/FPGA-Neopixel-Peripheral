@@ -2,7 +2,7 @@
 
 ## Project Overview
 Project for Georgia Tech ECE 2031. We created an FPGA Neopixel peripheral designed with Quartus Prime software using VHDL and ASM files. 
-The peripheral was as a state machine to switch between LED modes.
+The peripheral was designed as a state machine to switch between LED modes.
 Wrote assembly test scripts that verified both the internal functionality and the final output presented to the end user.
 The Neopixel peripheral can achieve seven different modes of functionality, based on what the user wants to accomplish, by using mode designation signals. 
 
@@ -17,3 +17,6 @@ An understanding of the different mode designations and their specific inputs (a
 - Gradient: Utilizes a single OUT statement and it sets all the pixels to a color changing gradient
 - Fade: Sends a single color to the peripheral and sets all the LEDs to that color and decrease and increase the brightness over time
 - Flow: Sets the color vector and constantly incrementing/decrementing its RGB values to make a smooth, dynamic color-shifting gradient which updates with each clock cycle
+
+## More Information
+More information on the peripheral can be found on the Project Summary file in the repository.
