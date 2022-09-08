@@ -19,4 +19,8 @@ An understanding of the different mode designations and their specific inputs (a
 - Flow: Sets the color vector and constantly incrementing/decrementing its RGB values to make a smooth, dynamic color-shifting gradient which updates with each clock cycle
 
 ## More Information
-More information on the peripheral can be found on the Project Summary file in the repository.
+More information on the peripheral can be found in the following files:
+
+- [Project Summary](https://github.com/austinrowland/FPGA-Neopixel-Peripheral/blob/main/ECE%202031%20Project%20Summary%20-%20Austin%20Rowland.pdf)
+- [Project Proposal](https://github.com/austinrowland/FPGA-Neopixel-Peripheral/blob/main/ECE%202031%20Project%20Proposal.pdf)
+- [State Machine UML Diagram](https://github.com/austinrowland/FPGA-Neopixel-Peripheral/blob/main/Neopixel%20Peripheral%20UML%20Diagram.png)
